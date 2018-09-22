@@ -1,6 +1,5 @@
 require 'rest-client'
 require 'json'
-require 'date'
 
 # Classe Tradutor
 class Tradutor
@@ -14,8 +13,9 @@ class Tradutor
   end
 
   def escrever
-    date = DateTime.new
-    File.open(date.strftime('%I:%M:%S %p'), 'w') do |line|
+    time = Time.new
+    nome_arquivo = time.strftime('%d-%m-%y_%H:%M') + '.txt'
+    File.open(nome_arquivo, 'w') do |line|
       line.puts @texto
       line.print @texto_traduzido
     end
@@ -24,11 +24,16 @@ class Tradutor
   private
 
   def traduzir
-    response = RestClient.get(@url, params: { key: @key, text: @texto, lang: @idioma })
+    response = RestClient.get(@url, params:
+      { key: @key, text: @texto, lang: @idioma })
     JSON.parse(response).values.flatten.last
   end
 end
 
-texto = Tradutor.new('Olá, tudo bem?', 'en')
-puts(texto.texto_traduzido)
-texto.escrever
+if ARGV.empty?
+  puts 'Digite o texto e a sigla do idioma para tradução'
+else
+  texto = Tradutor.new(ARGV[0], ARGV[1])
+  puts(texto.texto_traduzido)
+  texto.escrever
+end
